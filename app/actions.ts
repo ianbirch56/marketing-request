@@ -5,10 +5,11 @@ import { put } from '@vercel/blob';
 
 export async function submitMarketingRequest(formData: FormData) {
   try {
-    // Check if Vercel backend is configured (for local testing without keys)
-    if (!process.env.POSTGRES_URL || !process.env.BLOB_READ_WRITE_TOKEN) {
-      console.warn("Vercel Postgres or Blob keys are missing. Skipping backend save.");
-      return { success: true, fileUrls: [] };
+    if (!process.env.POSTGRES_URL) {
+      return { success: false, error: "Vercel Postgres is not connected. Please connect it in the Vercel Storage dashboard." };
+    }
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return { success: false, error: "Vercel Blob is not connected. Please connect it in the Vercel Storage dashboard." };
     }
 
     // 1. Upload files to Vercel Blob

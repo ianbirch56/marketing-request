@@ -79,7 +79,12 @@ export default function MarketingForm() {
         console.warn("EmailJS credentials not set. Simulating success.");
         await new Promise(resolve => setTimeout(resolve, 1000));
       } else {
-        await emailjs.sendForm(serviceId, templateId, form.current, publicKey);
+        try {
+          await emailjs.sendForm(serviceId, templateId, form.current, publicKey);
+        } catch (emailError: any) {
+          console.error("EmailJS Error:", emailError);
+          throw new Error("Your request was saved to the database, but the Email notification failed. This is usually because your new domain is not whitelisted in EmailJS.");
+        }
       }
 
       setIsSuccess(true);
