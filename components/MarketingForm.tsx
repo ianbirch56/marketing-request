@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import emailjs from "@emailjs/browser";
 import { submitMarketingRequest } from "../app/actions";
 
 export default function MarketingForm() {
@@ -60,32 +59,15 @@ export default function MarketingForm() {
       if (!response.success) {
         throw new Error(response.error);
       }
-
-      // Add a hidden input to the form to pass the Vercel Blob URLs to EmailJS template
-      if (response.fileUrls && response.fileUrls.length > 0) {
-        const hiddenInput = document.createElement("input");
-        hiddenInput.type = "hidden";
-        hiddenInput.name = "file_urls";
-        hiddenInput.value = response.fileUrls.join("\n");
-        form.current.appendChild(hiddenInput);
-      }
       
-      // 3. Send EmailJS Notification
-      const serviceId = process.env.NEXT_PUBLIC_EMAILJS_SERVICE_ID || "YOUR_SERVICE_ID";
-      const templateId = process.env.NEXT_PUBLIC_EMAILJS_TEMPLATE_ID || "YOUR_TEMPLATE_ID";
-      const publicKey = process.env.NEXT_PUBLIC_EMAILJS_PUBLIC_KEY || "YOUR_PUBLIC_KEY";
-
-      if (serviceId === "YOUR_SERVICE_ID") {
-        console.warn("EmailJS credentials not set. Simulating success.");
-        await new Promise(resolve => setTimeout(resolve, 1000));
-      } else {
-        try {
-          await emailjs.sendForm(serviceId, templateId, form.current, publicKey);
-        } catch (emailError: any) {
-          console.error("EmailJS Error:", emailError);
-          const rawError = emailError.text || emailError.message || JSON.stringify(emailError);
-          throw new Error(`Your request was saved to the database, but the Email notification failed. Exact EmailJS Error: ${rawError}`);
-        }
+      // If the email specifically failed but the DB worked, we still count it as a success, 
+      // but we can log a warning or tell the user.
+      if (response.emailStatus === 'failed') {
+        console.warn("Database saved successfully, but Email notification failed:", response.emailErrorMsg);
+        // Optionally, we could set a warning message state here, but for now we'll just let them see the success screen
+        // because their request IS safely in the database.
+      } else if (response.emailStatus === 'missing_key') {
+        console.warn("Resend API key is missing. Email skipped.");
       }
 
       setIsSuccess(true);

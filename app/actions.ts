@@ -68,7 +68,70 @@ export async function submitMarketingRequest(formData: FormData) {
       )
     `;
 
-    return { success: true, fileUrls: uploadedFileUrls };
+    // 3. Send Email Notification via Resend
+    let emailStatus = 'skipped';
+    let emailErrorMsg = '';
+    
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const { Resend } = await import('resend');
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        
+        const fileLinksHtml = uploadedFileUrls.length > 0 
+          ? `<ul>${uploadedFileUrls.map(url => `<li><a href="${url}">${url}</a></li>`).join('')}</ul>`
+          : '<p>No files attached.</p>';
+
+        const emailHtml = `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+            <h2 style="color: #6366f1; border-bottom: 2px solid #6366f1; padding-bottom: 10px;">New Marketing Request</h2>
+            <p><strong>From:</strong> ${firstName} ${lastName} (<a href="mailto:${email}">${email}</a>)</p>
+            <p><strong>Department:</strong> ${department}</p>
+            <p><strong>Deadline:</strong> ${deadline}</p>
+            <p><strong>Assistance Required:</strong> ${assistanceTypesArray.join(', ')}</p>
+            
+            <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <h3 style="margin-top: 0; color: #1f2937;">Details</h3>
+              <p style="white-space: pre-wrap; margin-bottom: 0;">${details}</p>
+            </div>
+            
+            <div style="background-color: #f3f4f6; padding: 15px; border-radius: 8px; margin: 15px 0;">
+              <h3 style="margin-top: 0; color: #1f2937;">Supplier Info</h3>
+              <p><strong>Quotes Required:</strong> ${quotesRequired}</p>
+              <p><strong>Preferred Supplier:</strong><br/> <span style="white-space: pre-wrap;">${preferredSupplier}</span></p>
+            </div>
+
+            <h3 style="color: #1f2937;">Attachments (${uploadedFileUrls.length})</h3>
+            ${fileLinksHtml}
+          </div>
+        `;
+
+        const { error } = await resend.emails.send({
+          // Note: If you have verified a domain in Resend (like ymcatrinity.org.uk), 
+          // change this to 'noreply@ymcatrinity.org.uk'. Otherwise, onboarding@resend.dev only sends to the account owner.
+          from: 'Marketing Requests <onboarding@resend.dev>', 
+          to: 'marcomms@ymcatrinity.org.uk',
+          subject: `New Marketing Request from ${firstName} ${lastName}`,
+          html: emailHtml,
+        });
+        
+        if (error) {
+          console.error("Resend API Error:", error);
+          emailStatus = 'failed';
+          emailErrorMsg = error.message;
+        } else {
+          emailStatus = 'sent';
+        }
+      } catch (err: any) {
+        console.error("Resend Exception:", err);
+        emailStatus = 'failed';
+        emailErrorMsg = err.message || JSON.stringify(err);
+      }
+    } else {
+      console.warn("RESEND_API_KEY is missing. Email notification skipped.");
+      emailStatus = 'missing_key';
+    }
+
+    return { success: true, fileUrls: uploadedFileUrls, emailStatus, emailErrorMsg };
   } catch (error: any) {
     console.error('Error saving request:', error);
     return { success: false, error: error.message };

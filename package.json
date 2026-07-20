@@ -9,12 +9,12 @@
     "lint": "eslint"
   },
   "dependencies": {
-    "@emailjs/browser": "^4.4.1",
     "@vercel/blob": "^2.6.1",
     "@vercel/postgres": "^0.10.0",
     "next": "16.2.10",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "resend": "^6.17.2"
   },
   "devDependencies": {
     "@types/node": "^20",
