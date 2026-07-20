@@ -85,7 +85,7 @@ export default function MarketingForm() {
       setIsSuccess(true);
     } catch (error: any) {
       console.error(error);
-      setErrorMsg("Failed to send request. Please check your connection or try again.");
+      setErrorMsg(`Error: ${error.message || "Failed to send request."}`);
     } finally {
       setIsSubmitting(false);
     }
