@@ -103,6 +103,10 @@ export async function submitMarketingRequest(formData: FormData) {
 
             <h3 style="color: #1f2937;">Attachments (${uploadedFileUrls.length})</h3>
             ${fileLinksHtml}
+
+            <div style="margin-top: 30px; text-align: center;">
+              <a href="https://marketing-request-eight.vercel.app/admin" style="background-color: #6366f1; color: white; padding: 12px 24px; text-decoration: none; border-radius: 6px; font-weight: bold; display: inline-block;">Open Admin Dashboard</a>
+            </div>
           </div>
         `;
 
