@@ -11,6 +11,13 @@ export default function MarketingForm() {
   const [errorMsg, setErrorMsg] = useState("");
   const [showOtherAssistance, setShowOtherAssistance] = useState(false);
   const [showWebsiteUpdateAlert, setShowWebsiteUpdateAlert] = useState(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setSelectedFiles(Array.from(e.target.files));
+    }
+  };
 
   const handleAssistanceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { value, checked } = e.target;
@@ -95,6 +102,7 @@ export default function MarketingForm() {
             if (form.current) form.current.reset();
             setShowOtherAssistance(false);
             setShowWebsiteUpdateAlert(false);
+            setSelectedFiles([]);
           }}
         >
           Submit Another Request
@@ -208,9 +216,20 @@ export default function MarketingForm() {
           <svg style={{ width: "32px", height: "32px", color: "var(--color-primary)", margin: "0 auto 12px" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
-          <span style={{ display: "block", color: "var(--color-text)", fontWeight: 500 }}>Browse Files</span>
-          <span style={{ fontSize: "0.85rem", color: "var(--color-text-muted)" }}>Click to select files from your computer</span>
-          <input type="file" id="files" name="files" className="file-upload-input" multiple />
+          {selectedFiles.length > 0 ? (
+            <div style={{ color: "var(--color-primary)", fontWeight: 600 }}>
+              {selectedFiles.length} file{selectedFiles.length === 1 ? '' : 's'} selected:
+              <ul style={{ listStyle: "none", padding: 0, marginTop: "8px", fontSize: "0.85rem", color: "var(--color-text)" }}>
+                {selectedFiles.map((f, i) => <li key={i}>{f.name}</li>)}
+              </ul>
+            </div>
+          ) : (
+            <>
+              <span style={{ display: "block", color: "var(--color-text)", fontWeight: 500 }}>Browse Files</span>
+              <span style={{ fontSize: "0.85rem", color: "var(--color-text-muted)" }}>Click to select files from your computer</span>
+            </>
+          )}
+          <input type="file" id="files" name="files" className="file-upload-input" multiple onChange={handleFileChange} />
         </div>
       </div>
 
