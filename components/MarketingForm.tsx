@@ -14,8 +14,14 @@ export default function MarketingForm() {
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setSelectedFiles(Array.from(e.target.files));
+    if (e.target.files && e.target.files.length > 0) {
+      const filesArray = [];
+      for (let i = 0; i < e.target.files.length; i++) {
+        filesArray.push(e.target.files[i]);
+      }
+      setSelectedFiles(filesArray);
+    } else {
+      setSelectedFiles([]);
     }
   };
 
@@ -219,6 +225,7 @@ export default function MarketingForm() {
             name="files" 
             multiple 
             onChange={handleFileChange} 
+            onClick={(e) => { (e.target as any).value = null; }}
             style={{
               position: "absolute",
               top: 0,
