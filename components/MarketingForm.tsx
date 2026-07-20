@@ -212,7 +212,7 @@ export default function MarketingForm() {
         <label htmlFor="files" className="form-label">
           Please provide any pictures, logos or other files that will help us fulfill your request
         </label>
-        <div className="file-upload-wrapper" onClick={() => document.getElementById('files')?.click()}>
+        <label className="file-upload-wrapper" htmlFor="files">
           <svg style={{ width: "32px", height: "32px", color: "var(--color-primary)", margin: "0 auto 12px" }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
           </svg>
@@ -230,7 +230,7 @@ export default function MarketingForm() {
             </>
           )}
           <input type="file" id="files" name="files" className="file-upload-input" multiple onChange={handleFileChange} />
-        </div>
+        </label>
       </div>
 
       {/* Printing Quotes */}
