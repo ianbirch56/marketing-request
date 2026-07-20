@@ -242,6 +242,7 @@ export default function MarketingForm() {
               <>
                 <span style={{ display: "block", color: "var(--color-text)", fontWeight: 500 }}>Browse Files</span>
                 <span style={{ fontSize: "0.85rem", color: "var(--color-text-muted)" }}>Click to select files from your computer</span>
+                <span style={{ display: "block", fontSize: "0.85rem", color: "var(--color-text-muted)", marginTop: "4px", fontWeight: "bold" }}>(Max file size: 50MB)</span>
               </>
             )}
           </div>
