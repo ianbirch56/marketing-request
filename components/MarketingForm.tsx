@@ -83,7 +83,8 @@ export default function MarketingForm() {
           await emailjs.sendForm(serviceId, templateId, form.current, publicKey);
         } catch (emailError: any) {
           console.error("EmailJS Error:", emailError);
-          throw new Error("Your request was saved to the database, but the Email notification failed. This is usually because your new domain is not whitelisted in EmailJS.");
+          const rawError = emailError.text || emailError.message || JSON.stringify(emailError);
+          throw new Error(`Your request was saved to the database, but the Email notification failed. Exact EmailJS Error: ${rawError}`);
         }
       }
 
