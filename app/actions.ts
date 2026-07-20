@@ -183,3 +183,38 @@ export async function getMarketingRequests(password: string) {
     return { success: false, error: error.message };
   }
 }
+
+export async function deleteMarketingRequest(id: number, password: string) {
+  if (password !== 'Lunacat@2026') {
+    return { success: false, error: 'Unauthorized' };
+  }
+  
+  try {
+    // 1. Fetch the request first to get the file_urls
+    const { rows } = await sql`SELECT file_urls FROM marketing_requests WHERE id = ${id}`;
+    if (rows.length > 0) {
+      const fileUrlsStr = rows[0].file_urls;
+      if (fileUrlsStr) {
+        try {
+          const fileUrls = JSON.parse(fileUrlsStr);
+          if (Array.isArray(fileUrls) && fileUrls.length > 0) {
+            // 2. Delete the physical files from Vercel Blob Storage to save space
+            const { del } = await import('@vercel/blob');
+            // Remove ?download=1 if present (though stored URLs shouldn't have it)
+            const cleanUrls = fileUrls.map(url => url.split('?')[0]);
+            await Promise.all(cleanUrls.map(url => del(url)));
+          }
+        } catch (e) {
+          console.error('Error deleting blobs:', e);
+        }
+      }
+    }
+
+    // 3. Delete from the database
+    await sql`DELETE FROM marketing_requests WHERE id = ${id}`;
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error deleting request:', error);
+    return { success: false, error: error.message };
+  }
+}
