@@ -17,6 +17,7 @@ export async function submitMarketingRequest(formData: FormData) {
       const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name}`;
       const blob = await put(`marketing_requests/${uniqueName}`, file, {
         access: 'public',
+        contentDisposition: `attachment; filename="${file.name}"`,
       });
       uploadedFileUrls.push(blob.url);
     }
