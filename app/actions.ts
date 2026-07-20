@@ -17,7 +17,6 @@ export async function submitMarketingRequest(formData: FormData) {
       const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name}`;
       const blob = await put(`marketing_requests/${uniqueName}`, file, {
         access: 'public',
-        contentDisposition: `attachment; filename="${file.name}"`,
       });
       uploadedFileUrls.push(blob.url);
     }
@@ -79,7 +78,7 @@ export async function submitMarketingRequest(formData: FormData) {
         const resend = new Resend(process.env.RESEND_API_KEY);
         
         const fileLinksHtml = uploadedFileUrls.length > 0 
-          ? `<ul>${uploadedFileUrls.map(url => `<li><a href="${url}">${url}</a></li>`).join('')}</ul>`
+          ? `<ul>${uploadedFileUrls.map(url => `<li><a href="${url}?download=1">${url}</a></li>`).join('')}</ul>`
           : '<p>No files attached.</p>';
 
         const emailHtml = `

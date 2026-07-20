@@ -141,7 +141,7 @@ export default function AdminDashboard() {
                           <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", display: "block", marginBottom: "4px" }}>Attached Files:</span>
                           <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                             {fileUrls.map((url: string, i: number) => (
-                              <a key={i} href={url} target="_blank" rel="noreferrer" style={{ 
+                              <a key={i} href={`${url}?download=1`} target="_blank" rel="noreferrer" style={{ 
                                 display: "inline-block",
                                 padding: "4px 12px", 
                                 backgroundColor: "rgba(230, 26, 45, 0.1)", 
