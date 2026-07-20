@@ -5,12 +5,7 @@ import { put } from '@vercel/blob';
 
 export async function submitMarketingRequest(formData: FormData) {
   try {
-    if (!process.env.POSTGRES_URL) {
-      return { success: false, error: "Vercel Postgres is not connected. Please connect it in the Vercel Storage dashboard." };
-    }
-    if (!process.env.BLOB_READ_WRITE_TOKEN) {
-      return { success: false, error: "Vercel Blob is not connected. Please connect it in the Vercel Storage dashboard." };
-    }
+    // Let Vercel SDKs throw their own errors so we can see exactly what they think is missing
 
     // 1. Upload files to Vercel Blob
     const files = formData.getAll('files') as File[];
