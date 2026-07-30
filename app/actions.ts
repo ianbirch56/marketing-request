@@ -102,14 +102,14 @@ export async function submitMarketingRequest(formData: FormData) {
         const { error: adminError } = await resend.emails.send({
           // Note: If you have verified a domain in Resend (like ymcatrinity.org.uk), 
           // change this to 'noreply@ymcatrinity.org.uk'. Otherwise, onboarding@resend.dev only sends to the account owner.
-          from: 'Marketing Requests <onboarding@resend.dev>', 
+          from: 'Marketing Requests <noreply@ymcatrinity.org.uk>', 
           to: 'marcomms@ymcatrinity.org.uk',
           subject: `New Marketing Request from ${firstName} ${lastName}`,
           html: emailHtml,
         });
 
         const { error: userError } = await resend.emails.send({
-          from: 'Marketing Requests <onboarding@resend.dev>', 
+          from: 'Marketing Requests <noreply@ymcatrinity.org.uk>', 
           to: email, // Send to the person who filled out the form
           subject: `Confirmation: Your Marketing Request has been received`,
           html: `
