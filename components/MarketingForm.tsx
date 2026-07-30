@@ -2,6 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { submitMarketingRequest } from "../app/actions";
+import { upload } from '@vercel/blob/client';
 
 export default function MarketingForm() {
   const form = useRef<HTMLFormElement>(null);
@@ -53,7 +54,23 @@ export default function MarketingForm() {
       
       const formData = new FormData(form.current);
       
-      // 1 & 2. Upload files to Vercel Blob and save to Vercel Postgres (Server Action)
+      // 1. Upload files directly to Vercel Blob from the client
+      const uploadedFileUrls: string[] = [];
+      for (const file of selectedFiles) {
+        if (file.size === 0) continue;
+        const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name}`;
+        const blob = await upload(`marketing_requests/${uniqueName}`, file, {
+          access: 'public',
+          handleUploadUrl: '/api/upload',
+        });
+        uploadedFileUrls.push(blob.url);
+      }
+
+      // Add the file URLs to formData (as a JSON string) and remove the raw files
+      formData.delete('files');
+      formData.append('uploadedFileUrls', JSON.stringify(uploadedFileUrls));
+
+      // 2. Save to Vercel Postgres (Server Action)
       const response = await submitMarketingRequest(formData);
 
       if (!response.success) {

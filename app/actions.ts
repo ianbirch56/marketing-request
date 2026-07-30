@@ -1,25 +1,15 @@
 'use server';
 
 import { sql } from '@vercel/postgres';
-import { put } from '@vercel/blob';
 
 export async function submitMarketingRequest(formData: FormData) {
   try {
     // Let Vercel SDKs throw their own errors so we can see exactly what they think is missing
 
-    // 1. Upload files to Vercel Blob
-    const files = formData.getAll('files') as File[];
-    const uploadedFileUrls: string[] = [];
-
-    for (const file of files) {
-      if (file.size === 0) continue;
-      // create a unique name to prevent overwriting
-      const uniqueName = `${Date.now()}-${Math.random().toString(36).substring(7)}-${file.name}`;
-      const blob = await put(`marketing_requests/${uniqueName}`, file, {
-        access: 'public',
-      });
-      uploadedFileUrls.push(blob.url);
-    }
+    // 1. Files are now uploaded on the client-side directly to Vercel Blob.
+    // We just need to parse the URLs passed in the form data.
+    const fileUrlsStrForm = formData.get('uploadedFileUrls') as string;
+    const uploadedFileUrls: string[] = fileUrlsStrForm ? JSON.parse(fileUrlsStrForm) : [];
 
     // 2. Insert into Postgres Database
     // Create the table if it doesn't exist yet
