@@ -99,7 +99,7 @@ export async function submitMarketingRequest(formData: FormData) {
           </div>
         `;
 
-        const { error } = await resend.emails.send({
+        const { error: adminError } = await resend.emails.send({
           // Note: If you have verified a domain in Resend (like ymcatrinity.org.uk), 
           // change this to 'noreply@ymcatrinity.org.uk'. Otherwise, onboarding@resend.dev only sends to the account owner.
           from: 'Marketing Requests <onboarding@resend.dev>', 
@@ -107,11 +107,40 @@ export async function submitMarketingRequest(formData: FormData) {
           subject: `New Marketing Request from ${firstName} ${lastName}`,
           html: emailHtml,
         });
+
+        const { error: userError } = await resend.emails.send({
+          from: 'Marketing Requests <onboarding@resend.dev>', 
+          to: email, // Send to the person who filled out the form
+          subject: `Confirmation: Your Marketing Request has been received`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+              <h2 style="color: #6366f1; border-bottom: 2px solid #6366f1; padding-bottom: 10px;">Marketing Request Confirmation</h2>
+              <p>Hi ${firstName},</p>
+              <p>Thank you for submitting a marketing request. We have received it and our team will review it shortly. Below is a copy of what you submitted for your records:</p>
+              
+              <div style="background-color: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb; margin: 20px 0;">
+                <p><strong>Department:</strong> ${department}</p>
+                <p><strong>Deadline:</strong> ${deadline}</p>
+                <p><strong>Assistance Required:</strong> ${assistanceTypesArray.join(', ')}</p>
+                <p><strong>Details:</strong></p>
+                <p style="white-space: pre-wrap; background-color: white; padding: 10px; border-radius: 4px; border: 1px solid #e5e7eb;">${details}</p>
+                <p><strong>Quotes Required:</strong> ${quotesRequired}</p>
+                <p><strong>Preferred Supplier:</strong> ${preferredSupplier || 'N/A'}</p>
+                <p><strong>Attachments:</strong> ${uploadedFileUrls.length} file(s)</p>
+              </div>
+              
+              <p>If you have any questions, please contact the marketing team at <a href="mailto:marcomms@ymcatrinity.org.uk">marcomms@ymcatrinity.org.uk</a>.</p>
+              <p>Thanks,<br>YMCA Trinity Group Marketing Team</p>
+            </div>
+          `
+        });
         
-        if (error) {
-          console.error("Resend API Error:", error);
+        const finalError = adminError || userError;
+        
+        if (finalError) {
+          console.error("Resend API Error:", finalError);
           emailStatus = 'failed';
-          emailErrorMsg = error.message;
+          emailErrorMsg = finalError.message;
         } else {
           emailStatus = 'sent';
         }
