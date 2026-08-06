@@ -170,6 +170,10 @@ export async function getMarketingRequests(password: string) {
     if (!process.env.POSTGRES_URL) {
       throw new Error("Missing POSTGRES_URL");
     }
+    
+    // Ensure the status column exists (for backward compatibility with old records)
+    await sql`ALTER TABLE marketing_requests ADD COLUMN IF NOT EXISTS status VARCHAR(50) DEFAULT 'pending'`;
+    
     const { rows } = await sql`SELECT * FROM marketing_requests ORDER BY created_at DESC`;
     return { success: true, requests: rows };
   } catch (error: any) {
@@ -234,6 +238,20 @@ export async function deleteMarketingRequest(id: number, password: string) {
     return { success: true };
   } catch (error: any) {
     console.error('Error deleting request:', error);
+    return { success: false, error: error.message };
+  }
+}
+
+export async function updateMarketingRequestStatus(id: number, status: string, password: string) {
+  if (password !== 'Lunacat@2026') {
+    return { success: false, error: 'Unauthorized' };
+  }
+  
+  try {
+    await sql`UPDATE marketing_requests SET status = ${status} WHERE id = ${id}`;
+    return { success: true };
+  } catch (error: any) {
+    console.error('Error updating status:', error);
     return { success: false, error: error.message };
   }
 }

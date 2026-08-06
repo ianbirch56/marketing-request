@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { getMarketingRequests, deleteMarketingRequest } from "../../app/actions";
+import { getMarketingRequests, deleteMarketingRequest, updateMarketingRequestStatus } from "../../app/actions";
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -44,6 +44,21 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error(err);
       alert("Failed to delete request");
+    }
+  };
+
+  const handleToggleStatus = async (id: number, currentStatus: string) => {
+    const newStatus = currentStatus === 'completed' ? 'pending' : 'completed';
+    try {
+      const response = await updateMarketingRequestStatus(id, newStatus, password);
+      if (response.success) {
+        setRequests(requests.map(req => req.id === id ? { ...req, status: newStatus } : req));
+      } else {
+        alert(response.error || "Failed to update status");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update status");
     }
   };
 
@@ -117,9 +132,22 @@ export default function AdminDashboard() {
                 }
 
                 return (
-                  <tr key={req.id} style={{ borderBottom: "1px solid var(--color-border)", transition: "background 0.2s" }} onMouseOver={e => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.02)"} onMouseOut={e => e.currentTarget.style.backgroundColor = "transparent"}>
+                  <tr key={req.id} style={{ borderBottom: "1px solid var(--color-border)", transition: "background 0.2s", opacity: req.status === 'completed' ? 0.7 : 1 }} onMouseOver={e => e.currentTarget.style.backgroundColor = "rgba(0,0,0,0.02)"} onMouseOut={e => e.currentTarget.style.backgroundColor = "transparent"}>
                     <td style={{ padding: "20px 16px", verticalAlign: "top", whiteSpace: "nowrap" }}>
                       {dateString}
+                      <br/>
+                      <span style={{ 
+                        display: "inline-block", 
+                        marginTop: "8px", 
+                        padding: "2px 8px", 
+                        borderRadius: "12px", 
+                        fontSize: "0.75rem", 
+                        fontWeight: "bold",
+                        backgroundColor: req.status === 'completed' ? "#dcfce7" : "#fef9c3",
+                        color: req.status === 'completed' ? "#166534" : "#854d0e"
+                      }}>
+                        {req.status === 'completed' ? 'Completed' : 'Pending'}
+                      </span>
                     </td>
                     <td style={{ padding: "20px 16px", verticalAlign: "top" }}>
                       <strong>{req.first_name} {req.last_name}</strong><br/>
@@ -174,7 +202,22 @@ export default function AdminDashboard() {
                         </div>
                       )}
 
-                      <div style={{ marginTop: "16px", textAlign: "right" }}>
+                      <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end", gap: "12px" }}>
+                        <button 
+                          onClick={() => handleToggleStatus(req.id, req.status || 'pending')}
+                          style={{ 
+                            background: req.status === 'completed' ? "#f3f4f6" : "#e0e7ff", 
+                            color: req.status === 'completed' ? "#4b5563" : "#4338ca", 
+                            border: req.status === 'completed' ? "1px solid #d1d5db" : "1px solid #a5b4fc", 
+                            padding: "6px 12px", 
+                            borderRadius: "4px", 
+                            cursor: "pointer", 
+                            fontSize: "0.85rem",
+                            fontWeight: 500
+                          }}
+                        >
+                          {req.status === 'completed' ? "Mark as Pending" : "Mark as Completed"}
+                        </button>
                         <button 
                           onClick={() => handleDelete(req.id)}
                           style={{ 
