@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { getMarketingRequests, deleteMarketingRequest, updateMarketingRequestStatus } from "../../app/actions";
+import { getMarketingRequests, deleteMarketingRequest, updateMarketingRequestStatus, updateMarketingRequestActionLog } from "../../app/actions";
 
 export default function AdminDashboard() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
@@ -59,6 +59,21 @@ export default function AdminDashboard() {
     } catch (err) {
       console.error(err);
       alert("Failed to update status");
+    }
+  };
+
+  const handleActionLogChange = async (id: number, newLog: string) => {
+    // Optimistically update the state
+    setRequests(requests.map(req => req.id === id ? { ...req, action_log: newLog } : req));
+    
+    try {
+      const response = await updateMarketingRequestActionLog(id, newLog, password);
+      if (!response.success) {
+        alert(response.error || "Failed to update action log");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Failed to update action log");
     }
   };
 
@@ -201,6 +216,28 @@ export default function AdminDashboard() {
                           </div>
                         </div>
                       )}
+
+                      <div style={{ marginTop: "16px", marginBottom: "8px" }}>
+                        <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", display: "block", marginBottom: "4px" }}>Action Log / Status Notes:</span>
+                        <input
+                          type="text"
+                          defaultValue={req.action_log || ''}
+                          onBlur={(e) => {
+                            if (e.target.value !== (req.action_log || '')) {
+                              handleActionLogChange(req.id, e.target.value);
+                            }
+                          }}
+                          placeholder="e.g. Sent to designer on 12/05..."
+                          style={{
+                            width: "100%",
+                            padding: "8px",
+                            border: "1px solid var(--color-border)",
+                            borderRadius: "4px",
+                            fontSize: "0.85rem",
+                            fontFamily: "inherit"
+                          }}
+                        />
+                      </div>
 
                       <div style={{ marginTop: "16px", display: "flex", justifyContent: "flex-end", gap: "12px" }}>
                         <button 
