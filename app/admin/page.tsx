@@ -219,22 +219,23 @@ export default function AdminDashboard() {
 
                       <div style={{ marginTop: "16px", marginBottom: "8px" }}>
                         <span style={{ fontSize: "0.8rem", color: "var(--color-text-muted)", display: "block", marginBottom: "4px" }}>Action Log / Status Notes:</span>
-                        <input
-                          type="text"
+                        <textarea
                           defaultValue={req.action_log || ''}
                           onBlur={(e) => {
                             if (e.target.value !== (req.action_log || '')) {
                               handleActionLogChange(req.id, e.target.value);
                             }
                           }}
-                          placeholder="e.g. Sent to designer on 12/05..."
+                          placeholder="e.g. Sent to designer on 12/05...&#10;Draft sent to Lucy on 15/05..."
+                          rows={4}
                           style={{
                             width: "100%",
                             padding: "8px",
                             border: "1px solid var(--color-border)",
                             borderRadius: "4px",
                             fontSize: "0.85rem",
-                            fontFamily: "inherit"
+                            fontFamily: "inherit",
+                            resize: "vertical"
                           }}
                         />
                       </div>
